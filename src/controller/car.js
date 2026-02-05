@@ -1,5 +1,4 @@
-// import CarModel from "../models/car.js";
-// import { v4 as uuid } from "uuid";
+
 
 let cars = [
   { id: "a1b2c3d4e5", model: "BMW", year: "2025" },
