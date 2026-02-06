@@ -5,13 +5,16 @@ import {
   getCarById, 
   insertCar, 
   updateCarById,
-  deleteCarById } from "../controller/car.js";
+  deleteCarById 
+} from "../controller/car.js";
+
+import auth from "../middleware/auth.js";
 
   
 const router = express.Router();
 
 
-router.get("/cars", getAllCars);
+router.get("/cars", auth, getAllCars);
 
 router.get("/cars/:id", getCarById);
 
