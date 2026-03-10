@@ -1,11 +1,14 @@
 import express from "express";
-import carsRouter from "./src/router/car.js";
+import cors from "cors";
+import boardgameRouter from "./src/router/boardgame.js";
 import userRouter from "./src/router/user.js";
-import mongoose from "mongoose";
 
+import mongoose from "mongoose";
 import "dotenv/config";
 
 const app = express();
+
+app.use(cors());
 
 mongoose
   .connect(process.env.MONGO_DB_CONNECTION)
@@ -16,15 +19,13 @@ mongoose
 
 app.use(express.json());
 
-app.use(carsRouter);
+app.use(boardgameRouter);
 app.use(userRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "This endpoint does not exist" });
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });

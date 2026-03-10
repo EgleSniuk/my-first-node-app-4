@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import UserModel from "../models/user.js";
 import { v4 as uuid } from "uuid";
 import jwt from "jsonwebtoken";
+import UserModel from "../models/user.js";
 
 export const createNewUser = async (req, res) => {
   const data = req.body;
@@ -13,9 +13,8 @@ export const createNewUser = async (req, res) => {
     id: uuid(),
     ...data,
     password: hash,
-    cars: []
+    savedBoardgames: [],
   });
-
   await user.save();
 
   return res.status(201).json({ user: user });
@@ -24,24 +23,51 @@ export const createNewUser = async (req, res) => {
 export const login = async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
- 
+
+  console.log(req.body);
+
   const user = await UserModel.findOne({ email: email });
-  
+
   if (!user) {
     return res.status(401).json({ message: "Bad email" });
   }
- 
+
   const isPasswordMatch = bcrypt.compareSync(password, user.password);
- 
+
   if (!isPasswordMatch) {
     return res.status(401).json({ message: "Bad password" });
   }
- 
+
   const token = jwt.sign(
     { email: user.email, userId: user.id },
     process.env.JWT_RANDOMISER,
     { expiresIn: "12h" },
   );
- 
+
   return res.status(200).json({ jwt: token });
+};
+
+export const saveBoardgameToUser = async (req, res) => {
+  const { userId, boardgameId } = req.body;
+
+  const exists = await UserModel.exists({
+    id: userId,
+    savedBoardgames: boardgameId,
+  });
+
+  if (!exists) {
+    await UserModel.updateOne(
+      { id: userId },
+      { $addToSet: { savedBoardgames: boardgameId } },
+    );
+
+    return res.status(200).json({ message: "Saved" });
+  }
+
+  await UserModel.updateOne(
+    { id: userId },
+    { $pull: { savedBoardgames: boardgameId } },
+  );
+
+  return res.status(200).json({ message: "Removed" });
 };
